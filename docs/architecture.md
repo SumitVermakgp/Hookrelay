@@ -3,7 +3,9 @@
 ## Flow
 
 1. `POST /endpoints` validates the URL against the destination policy and stores the
-   endpoint with a server-generated secret.
+   endpoint with a server-generated secret. A unique constraint on `endpoints.url`
+   decides duplicates, and the row count is checked against `HOOKRELAY_MAX_ENDPOINTS`
+   inside the same transaction as the insert.
 2. `POST /events` stores the event (canonical JSON) and, in one transaction, one `pending`
    delivery per existing endpoint. A unique constraint on `events.idempotency_key`
    decides duplicates.
@@ -16,7 +18,7 @@
 
 | Table | Notes |
 | --- | --- |
-| `endpoints` | `url`, `secret` (plaintext), `description` |
+| `endpoints` | unique `url`, `secret` (plaintext), `description` |
 | `events` | `type`, canonical JSON `payload`, nullable unique `idempotency_key` |
 | `deliveries` | one per (event, endpoint). `status` is `pending`, `succeeded` or `failed`. `next_attempt_at` is set while a retry is scheduled |
 | `delivery_attempts` | one row per attempt, unique on (`delivery_id`, `attempt_number`). `error` holds a fixed category, never exception text |
