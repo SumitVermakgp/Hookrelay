@@ -6,6 +6,7 @@ from app.core.config import Settings, load_settings
 def test_defaults() -> None:
     s = load_settings({})
     assert s.max_attempts == 3
+    assert s.max_endpoints == 100
     assert s.max_payload_bytes == 65_536
     assert s.test_allowed_hosts == frozenset()
 
@@ -15,11 +16,13 @@ def test_env_overrides() -> None:
         {
             "HOOKRELAY_DB_PATH": "x.db",
             "HOOKRELAY_MAX_ATTEMPTS": "5",
+            "HOOKRELAY_MAX_ENDPOINTS": "7",
             "HOOKRELAY_TEST_ALLOWED_HOSTS": " 127.0.0.1 , Localhost ,",
         }
     )
     assert s.db_path == "x.db"
     assert s.max_attempts == 5
+    assert s.max_endpoints == 7
     assert s.test_allowed_hosts == frozenset({"127.0.0.1", "localhost"})
 
 
@@ -74,6 +77,9 @@ def test_retry_defaults_and_overrides() -> None:
     "env",
     [
         {"HOOKRELAY_MAX_ATTEMPTS": "21"},
+        {"HOOKRELAY_MAX_ENDPOINTS": "0"},
+        {"HOOKRELAY_MAX_ENDPOINTS": "10001"},
+        {"HOOKRELAY_MAX_ENDPOINTS": "lots"},
         {"HOOKRELAY_RETRY_BASE_SECONDS": "-1"},
         {"HOOKRELAY_RETRY_BASE_SECONDS": "100", "HOOKRELAY_RETRY_MAX_DELAY_SECONDS": "10"},
         {"HOOKRELAY_RETRY_INTERVAL_SECONDS": "-1"},

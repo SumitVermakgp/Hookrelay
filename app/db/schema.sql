@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS endpoints (
     id TEXT PRIMARY KEY,
-    url TEXT NOT NULL,
+    url TEXT NOT NULL UNIQUE,
     secret TEXT NOT NULL,
     description TEXT,
     created_at TEXT NOT NULL

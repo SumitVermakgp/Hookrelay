@@ -52,7 +52,9 @@ class Env:
         self.settings = Settings(db_path=str(tmp_path / "d.db"), test_allowed_hosts=allowed)
         init_db(self.settings.db_path)
         self.db = connect(self.settings.db_path)
-        self.endpoints = [create_endpoint(self.db, u, None) for u in urls]
+        self.endpoints = [
+            create_endpoint(self.db, u, None, self.settings.max_endpoints) for u in urls
+        ]
         self.event, _ = create_event(self.db, "order.paid", PAYLOAD, None)
         rows = self.db.execute("SELECT id, endpoint_id FROM deliveries ORDER BY created_at, id")
         self.delivery_ids = [r["id"] for r in rows]

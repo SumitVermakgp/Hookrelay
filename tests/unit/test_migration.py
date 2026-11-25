@@ -1,7 +1,9 @@
 import sqlite3
 from pathlib import Path
 
-from app.db.database import connect, init_db
+import pytest
+
+from app.db.database import DuplicateEndpointUrls, connect, init_db
 
 PHASE4_DELIVERIES = """
 CREATE TABLE endpoints (id TEXT PRIMARY KEY, url TEXT NOT NULL, secret TEXT NOT NULL,
@@ -47,3 +49,50 @@ def test_fresh_database_has_column_and_index(tmp_path: Path) -> None:
     conn = connect(path)
     cols = {r["name"] for r in conn.execute("PRAGMA table_info(deliveries)")}
     assert "next_attempt_at" in cols
+
+
+def _unique_url_indexes(conn: sqlite3.Connection) -> list[str]:
+    names = []
+    for index in conn.execute("PRAGMA index_list(endpoints)"):
+        if not index["unique"]:
+            continue
+        columns = [r["name"] for r in conn.execute(f'PRAGMA index_info("{index["name"]}")')]
+        if columns == ["url"]:
+            names.append(index["name"])
+    return names
+
+
+def _old_db(tmp_path: Path, name: str, extra_sql: str = "") -> str:
+    path = str(tmp_path / name)
+    raw = sqlite3.connect(path)
+    raw.executescript(PHASE4_DELIVERIES + extra_sql)
+    raw.commit()
+    raw.close()
+    return path
+
+
+def test_endpoint_url_uniqueness_is_added_to_an_old_database(tmp_path: Path) -> None:
+    path = _old_db(tmp_path, "urls.db")
+    init_db(path)
+    init_db(path)  # idempotent
+
+    conn = connect(path)
+    assert _unique_url_indexes(conn) == ["idx_endpoints_url"]
+    with pytest.raises(sqlite3.IntegrityError):
+        conn.execute("INSERT INTO endpoints VALUES ('e2', 'https://x.example.com', 's', NULL, 'n')")
+
+
+def test_fresh_database_is_not_given_a_redundant_url_index(tmp_path: Path) -> None:
+    path = str(tmp_path / "fresh.db")
+    init_db(path)
+    assert len(_unique_url_indexes(connect(path))) == 1
+
+
+def test_existing_duplicate_urls_stop_startup_with_a_clear_error(tmp_path: Path) -> None:
+    path = _old_db(
+        tmp_path,
+        "dupes.db",
+        "INSERT INTO endpoints VALUES ('ep2', 'https://x.example.com', 's2', NULL, 'now');",
+    )
+    with pytest.raises(DuplicateEndpointUrls, match="1 endpoint url"):
+        init_db(path)

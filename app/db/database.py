@@ -20,6 +20,26 @@ def connect(db_path: str) -> sqlite3.Connection:
     return conn
 
 
+class DuplicateEndpointUrls(RuntimeError):
+    """An existing database holds endpoint URLs that the current schema forbids."""
+
+
+def _url_is_already_unique(conn: sqlite3.Connection) -> bool:
+    """Whether endpoints.url is covered by a single-column unique index.
+
+    A database created from the current schema.sql gets one from the UNIQUE column
+    constraint, so the migration below must not add a second, redundant index.
+    """
+    for index in conn.execute("PRAGMA index_list(endpoints)"):
+        if not index["unique"]:
+            continue
+        # PRAGMA takes no bound parameters, and these names come from SQLite itself.
+        columns = [r["name"] for r in conn.execute(f'PRAGMA index_info("{index["name"]}")')]
+        if columns == ["url"]:
+            return True
+    return False
+
+
 def _migrate(conn: sqlite3.Connection) -> None:
     """Bring databases created by earlier phases up to the current schema."""
     columns = {r["name"] for r in conn.execute("PRAGMA table_info(deliveries)")}
@@ -28,6 +48,19 @@ def _migrate(conn: sqlite3.Connection) -> None:
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_deliveries_due ON deliveries (status, next_attempt_at)"
     )
+    if not _url_is_already_unique(conn):
+        # CREATE TABLE IF NOT EXISTS leaves an older endpoints table without the UNIQUE
+        # column constraint, so the same guarantee is added as an index instead.
+        try:
+            conn.execute("CREATE UNIQUE INDEX idx_endpoints_url ON endpoints (url)")
+        except sqlite3.IntegrityError:
+            duplicates = conn.execute(
+                "SELECT COUNT(*) FROM (SELECT url FROM endpoints GROUP BY url HAVING COUNT(*) > 1)"
+            ).fetchone()[0]
+            raise DuplicateEndpointUrls(
+                f"{duplicates} endpoint url(s) are registered more than once. Endpoint urls must "
+                "now be unique; remove the extra rows before starting."
+            ) from None
 
 
 def _restrict_permissions(db_path: str) -> None:

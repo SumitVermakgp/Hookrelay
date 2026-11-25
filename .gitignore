@@ -13,3 +13,4 @@ CLAUDE.md
 .claude/settings.local.json
 # NOTE: .claude/ itself is deliberately NOT ignored. Claude Approvals reads
 # .claude/approvals.yml from the default branch, so it must be committed (PR 6).
+*.egg-info/
