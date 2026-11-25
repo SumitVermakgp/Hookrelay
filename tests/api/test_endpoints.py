@@ -1,5 +1,6 @@
 import logging
 import sqlite3
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -82,6 +83,36 @@ def test_distinct_paths_on_one_host_are_separate_endpoints(client: TestClient) -
     b = _create(client, "https://hooks.example.com/b")
     assert a["id"] != b["id"]
     assert len(client.get("/endpoints").json()) == 2
+
+
+def test_registration_stops_at_the_endpoint_limit(two_endpoint_client: TestClient) -> None:
+    c = two_endpoint_client
+    allowed = [_create(c, _url(i))["id"] for i in range(2)]
+    r = c.post("/endpoints", json={"url": _url(2)})
+    assert r.status_code == 409
+    assert r.json()["detail"] == "endpoint limit reached (2)"
+    assert [e["id"] for e in c.get("/endpoints").json()] == allowed
+
+
+def test_rejected_endpoint_over_the_limit_is_not_stored(
+    two_endpoint_client: TestClient, tmp_path: Path
+) -> None:
+    """The insert happens before the count, so the rollback must leave no trace."""
+    c = two_endpoint_client
+    for i in range(2):
+        _create(c, _url(i))
+    assert c.post("/endpoints", json={"url": _url(99)}).status_code == 409
+    rows = sqlite3.connect(str(tmp_path / "capped.db")).execute("SELECT url FROM endpoints")
+    assert sorted(r[0] for r in rows.fetchall()) == [_url(0), _url(1)]
+
+
+def test_duplicate_is_reported_before_the_limit(two_endpoint_client: TestClient) -> None:
+    c = two_endpoint_client
+    for i in range(2):
+        _create(c, _url(i))
+    r = c.post("/endpoints", json={"url": _url(0)})
+    assert r.status_code == 409
+    assert r.json()["detail"] == "url is already registered"
 
 
 def test_secret_is_stored_for_later_signing(client: TestClient, settings: Settings) -> None:

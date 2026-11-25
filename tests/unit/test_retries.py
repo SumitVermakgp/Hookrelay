@@ -61,7 +61,7 @@ class World:
         self.settings = Settings(**kw)  # type: ignore[arg-type]
         init_db(self.settings.db_path)
         self.db = connect(self.settings.db_path)
-        create_endpoint(self.db, "https://hooks.example.com/r", None)
+        create_endpoint(self.db, "https://hooks.example.com/r", None, self.settings.max_endpoints)
         create_event(self.db, "t", "{}", None)
         self.delivery_id: str = self.db.execute("SELECT id FROM deliveries").fetchone()["id"]
         self.clock = Clock()

@@ -51,6 +51,18 @@ def allowlisted_client(tmp_path: Path) -> Iterator[TestClient]:
 
 
 @pytest.fixture
+def two_endpoint_client(tmp_path: Path) -> Iterator[TestClient]:
+    """Client that accepts at most two endpoints, to exercise the registration cap."""
+    s = Settings(
+        db_path=str(tmp_path / "capped.db"),
+        max_endpoints=2,
+        auto_deliver=False,
+        retry_interval_seconds=0,
+    )
+    yield from make_client(s)
+
+
+@pytest.fixture
 def small_limit_client(tmp_path: Path) -> Iterator[TestClient]:
     s = Settings(
         db_path=str(tmp_path / "small.db"),

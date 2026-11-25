@@ -9,6 +9,7 @@ from dataclasses import dataclass
 class Settings:
     db_path: str = "hookrelay.db"
     max_attempts: int = 3
+    max_endpoints: int = 100
     max_payload_bytes: int = 65_536
     test_allowed_hosts: frozenset[str] = frozenset()
     delivery_timeout_seconds: float = 10.0
@@ -20,6 +21,8 @@ class Settings:
     def __post_init__(self) -> None:
         if not 1 <= self.max_attempts <= 20:
             raise ValueError("max_attempts must be between 1 and 20")
+        if not 1 <= self.max_endpoints <= 10_000:
+            raise ValueError("max_endpoints must be between 1 and 10000")
         if not 0 <= self.retry_base_seconds <= self.retry_max_delay_seconds:
             raise ValueError("retry_base_seconds must be between 0 and retry_max_delay_seconds")
         if not 0 <= self.retry_interval_seconds <= 3600:
@@ -49,6 +52,7 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
     return Settings(
         db_path=source.get("HOOKRELAY_DB_PATH", "hookrelay.db"),
         max_attempts=int(source.get("HOOKRELAY_MAX_ATTEMPTS", "3")),
+        max_endpoints=int(source.get("HOOKRELAY_MAX_ENDPOINTS", "100")),
         max_payload_bytes=int(source.get("HOOKRELAY_MAX_PAYLOAD_BYTES", "65536")),
         test_allowed_hosts=frozenset(hosts),
         delivery_timeout_seconds=float(source.get("HOOKRELAY_DELIVERY_TIMEOUT", "10")),
