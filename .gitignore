@@ -1,0 +1,10 @@
+__pycache__/
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.db
+.env
+.coverage
+# Ground-truth defect notes must never be committed (see EXPERIMENT_LOG.md).
+experiment-private/
