@@ -17,11 +17,11 @@ Do not name tests, branches or commit messages after defect IDs.
 | --- | --- |
 | Date | 2026-11-25 |
 | Built by | Claude (chat session in the claude.ai app, model reported as Claude Sonnet 5.5), phase by phase with explicit approval. Not Claude Code. See deviations |
-| Base commit SHA | fill in after the first commit |
+| Base commit SHA | `f3a2fbbdf50d6055350ccdef12f1a09ba41fa401` (`Baseline`) |
 | Python | 3.12.3 |
 | Dependencies | pinned in `constraints.txt` |
 | Local results | ruff check, ruff format --check and mypy clean. 396 tests passed in a clean virtual environment (after the Phase 8 review changes). Raw output in `experiment-evidence/00-baseline/` |
-| CI | not run yet. The workflow is unverified until pushed |
+| CI | verified. Run [45626699028](https://github.com/SumitVermakgp/Hookrelay/actions/runs/45626699028) on the baseline push succeeded in 39 s (2026-11-25T13:44:43Z) |
 | Claude Ship availability | vendor documentation checked on 2026-11-25 (see below). Access for your organisation and repository is still to be verified in the admin settings before PR 1 |
 
 ## Deviations from the brief

@@ -8,3 +8,8 @@ __pycache__/
 .coverage
 # Ground-truth defect notes must never be committed (see EXPERIMENT_LOG.md).
 experiment-private/
+# Agent-local context. This is a public repo (see EXPERIMENT_LOG.md).
+CLAUDE.md
+.claude/settings.local.json
+# NOTE: .claude/ itself is deliberately NOT ignored. Claude Approvals reads
+# .claude/approvals.yml from the default branch, so it must be committed (PR 6).
