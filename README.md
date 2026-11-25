@@ -9,6 +9,7 @@ endpoints, retries transient failures, and records every attempt.
 
 [![CI](https://github.com/SumitVermakgp/Hookrelay/actions/workflows/ci.yml/badge.svg)](https://github.com/SumitVermakgp/Hookrelay/actions/workflows/ci.yml)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 </div>
 
@@ -252,3 +253,8 @@ experiment-evidence/  evidence folders for the Claude Ship experiment
 
 Some tests use real sockets on `127.0.0.1` with short timeouts of a few hundred
 milliseconds. On a very slow machine they can fail for timing reasons.
+
+## License
+
+[MIT](LICENSE).
+
