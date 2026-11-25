@@ -10,8 +10,13 @@ from app.core.config import Settings
 URL = "https://hooks.example.com/receive"
 
 
-def _create(client: TestClient, **extra: object) -> dict[str, object]:
-    r = client.post("/endpoints", json={"url": URL, **extra})
+def _url(n: int) -> str:
+    """A distinct destination per call: endpoint urls must now be unique."""
+    return f"https://hooks{n}.example.com/receive"
+
+
+def _create(client: TestClient, url: str = URL, **extra: object) -> dict[str, object]:
+    r = client.post("/endpoints", json={"url": url, **extra})
     assert r.status_code == 201, r.text
     body: dict[str, object] = r.json()
     return body
@@ -31,11 +36,11 @@ def test_create_returns_secret_once(client: TestClient) -> None:
 
 
 def test_secrets_are_unique(client: TestClient) -> None:
-    assert _create(client)["secret"] != _create(client)["secret"]
+    assert _create(client, _url(1))["secret"] != _create(client, _url(2))["secret"]
 
 
 def test_list_never_contains_secret(client: TestClient) -> None:
-    created = [_create(client) for _ in range(3)]
+    created = [_create(client, _url(i)) for i in range(3)]
     r = client.get("/endpoints")
     assert r.status_code == 200
     items = r.json()
@@ -45,6 +50,38 @@ def test_list_never_contains_secret(client: TestClient) -> None:
     for c in created:
         assert str(c["secret"]) not in r.text
     assert "whsec_" not in r.text
+
+
+def test_duplicate_url_is_rejected(client: TestClient) -> None:
+    first = _create(client)
+    r = client.post("/endpoints", json={"url": URL})
+    assert r.status_code == 409
+    assert r.json()["detail"] == "url is already registered"
+    assert [e["id"] for e in client.get("/endpoints").json()] == [first["id"]]
+
+
+def test_duplicate_url_leaves_the_first_secret_untouched(
+    client: TestClient, settings: Settings
+) -> None:
+    """A rejected re-registration must not rotate or re-reveal the stored secret."""
+    first = _create(client)
+    r = client.post("/endpoints", json={"url": URL, "description": "second try"})
+    assert r.status_code == 409
+    assert str(first["secret"]) not in r.text
+    rows = sqlite3.connect(settings.db_path).execute("SELECT secret, description FROM endpoints")
+    assert rows.fetchall() == [(first["secret"], None)]
+
+
+def test_duplicate_url_is_rejected_regardless_of_description(client: TestClient) -> None:
+    _create(client, URL, description="first")
+    assert client.post("/endpoints", json={"url": URL, "description": "other"}).status_code == 409
+
+
+def test_distinct_paths_on_one_host_are_separate_endpoints(client: TestClient) -> None:
+    a = _create(client, "https://hooks.example.com/a")
+    b = _create(client, "https://hooks.example.com/b")
+    assert a["id"] != b["id"]
+    assert len(client.get("/endpoints").json()) == 2
 
 
 def test_secret_is_stored_for_later_signing(client: TestClient, settings: Settings) -> None:
@@ -118,7 +155,7 @@ def test_invalid_bodies_return_422(client: TestClient, body: dict[str, object]) 
 
 
 def test_pagination(client: TestClient) -> None:
-    ids = [_create(client)["id"] for _ in range(5)]
+    ids = [_create(client, _url(i))["id"] for i in range(5)]
     page1 = client.get("/endpoints", params={"limit": 2}).json()
     page2 = client.get("/endpoints", params={"limit": 2, "offset": 2}).json()
     page3 = client.get("/endpoints", params={"limit": 2, "offset": 4}).json()

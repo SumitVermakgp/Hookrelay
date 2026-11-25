@@ -12,7 +12,12 @@ from app.services import endpoints as service
 router = APIRouter(prefix="/endpoints", tags=["endpoints"])
 
 
-@router.post("", response_model=EndpointCreated, status_code=201)
+@router.post(
+    "",
+    response_model=EndpointCreated,
+    status_code=201,
+    responses={409: {"description": "The url is already registered"}},
+)
 def register_endpoint(
     body: EndpointCreate,
     request: Request,
@@ -24,7 +29,10 @@ def register_endpoint(
         validate_destination_url(body.url, request.app.state.settings.test_allowed_hosts, resolver)
     except UrlPolicyError as exc:
         raise HTTPException(status_code=422, detail=f"url rejected: {exc}") from None
-    row = service.create_endpoint(db, body.url, body.description)
+    try:
+        row = service.create_endpoint(db, body.url, body.description)
+    except service.EndpointExists:
+        raise HTTPException(status_code=409, detail="url is already registered") from None
     response.headers["Cache-Control"] = "no-store"
     return EndpointCreated(**dict(row))
 

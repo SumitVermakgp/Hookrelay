@@ -21,8 +21,8 @@ def _add_endpoints(path: str, n: int) -> None:
     for i in range(n):
         conn.execute(
             "INSERT INTO endpoints (id, url, secret, description, created_at) "
-            "VALUES (?, 'https://x.example.com', 's', NULL, ?)",
-            (uuid.uuid4().hex, f"2026-01-01T00:00:0{i}"),
+            "VALUES (?, ?, 's', NULL, ?)",
+            (uuid.uuid4().hex, f"https://x{i}.example.com", f"2026-01-01T00:00:0{i}"),
         )
     conn.commit()
     conn.close()
