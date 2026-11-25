@@ -1,0 +1,10 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security problem
+    url: https://github.com/SumitVermakgp/Hookrelay/blob/main/SECURITY.md
+    about: >
+      Do not open a public issue for a vulnerability. Follow the reporting process in
+      SECURITY.md.
+  - name: Contributing guide
+    url: https://github.com/SumitVermakgp/Hookrelay/blob/main/CONTRIBUTING.md
+    about: Scope, development setup, the required checks, and how changes are reviewed.

@@ -1,0 +1,76 @@
+name: Change proposal
+description: Propose a behaviour change, a new test, or a documentation fix
+labels: ["proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        HookRelay is a local-first experiment, not production software, and making it
+        production-ready is not a goal. Please read the scope section of
+        [CONTRIBUTING.md](https://github.com/SumitVermakgp/Hookrelay/blob/main/CONTRIBUTING.md) before proposing a change.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: >
+        What is wrong or missing today, from the point of view of someone using or reading
+        the code. Please describe the problem, not only the solution you have in mind.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: What you think should happen instead.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Endpoint registration and validation
+        - Event creation and idempotency
+        - Delivery and retries
+        - Signing and verification
+        - Destination policy (SSRF defence)
+        - Configuration
+        - Database schema or migrations
+        - Tests
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: Would this change
+      options:
+        - label: The HTTP API (status codes, request or response shape)
+        - label: The database schema, needing a migration
+        - label: A configuration variable's name, default or range
+        - label: Signing, secret handling or the destination policy
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you weighed, and why you set them aside.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Before submitting
+      options:
+        - label: >
+            This does not assume HookRelay is deployed, multi-tenant or reachable from the
+            internet
+          required: true
+        - label: This is not a security vulnerability report
+          required: true
