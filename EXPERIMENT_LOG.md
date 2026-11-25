@@ -47,6 +47,9 @@ Do not name tests, branches or commit messages after defect IDs.
 10. **Policy file not added.** No `.claude/approvals.yml` exists in the baseline. Adding one to
     the default branch turns on Claude Approvals and billing for the repository, so it is
     deferred to PR 6.
+11. **PR 1 was merged without a review.** Claude Ship was not enabled on the repository when
+    PR 1 was opened, so no agent ran on it. The planned PR 1 measurement of Code Review was
+    not taken. The code change itself landed; see the run entry below.
 
 ## Defects found in the baseline during implementation
 
@@ -143,4 +146,24 @@ usage data. Count only actionable, correct findings as detections.
 
 ## Runs
 
-None yet.
+### PR 1 (no capability exercised)
+
+| Field | Record |
+| --- | --- |
+| Run ID / date | not a measured run. 2026-11-25 |
+| Claude Ship capability | none. No agent was enabled on the repository at the time |
+| Model / configuration | not applicable |
+| Repository commit | base `aac5bb2`, PR head `f40ee85`, merge commit `ded46bc` |
+| Seeded defect IDs | none. PR 1 is a clean change |
+| Expected outcome | Code Review findings on the registration change |
+| Observed output | none. The only check run on the head commit was `checks` from `github-actions`. No `Claude Code Review` check appeared and no agent commented |
+| Correctness assessment | not applicable, nothing was produced to assess |
+| Human intervention | the change was written, reviewed and merged by hand |
+| CI outcome | passed before merge (run 45672641304, 38 s) and on the merge commit |
+| Latency and usage | unavailable |
+| Evidence links | https://github.com/SumitVermakgp/Hookrelay/pull/1 |
+
+**Interpretation.** This is not evidence about Code Review in either direction. The clean
+change for the "endpoint registration and validation" area is now on the default branch, so
+if that area is still wanted as a Code Review case, it needs a fresh change rather than a
+re-run of this one.

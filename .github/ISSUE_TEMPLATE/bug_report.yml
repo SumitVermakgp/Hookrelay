@@ -1,0 +1,86 @@
+name: Bug report
+description: Something behaves differently from what the documentation says
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do not report security problems here. Follow
+        [SECURITY.md](https://github.com/SumitVermakgp/Hookrelay/blob/main/SECURITY.md) instead, and keep secrets, real signing
+        keys and private URLs out of this form.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened
+      description: The behaviour you saw, and the behaviour you expected instead.
+      placeholder: |
+        Registering an endpoint returned 500 instead of 409 when the url was already
+        registered.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: >
+        The smallest sequence that shows it. Requests as `curl` commands are ideal.
+        Redact signing secrets.
+      placeholder: |
+        1. Start with HOOKRELAY_TEST_ALLOWED_HOSTS=127.0.0.1
+        2. curl -s -X POST http://127.0.0.1:8000/endpoints -H 'content-type: application/json' -d '{"url":"http://127.0.0.1:9000/ok"}'
+        3. Repeat step 2
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Response or log output
+      description: >
+        The status code and body you got, and any relevant log lines. Check that no
+        `whsec_` secret is included before you paste.
+      render: shell
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: Commit
+      description: The commit SHA you are running, from `git rev-parse --short HEAD`.
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      description: From `python --version`.
+      placeholder: "3.12.4"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: checks
+    attributes:
+      label: Does the test suite pass on your checkout?
+      description: "`pytest -q`, before your change."
+      options:
+        - "Yes, the suite passes"
+        - "No, other tests fail too"
+        - "I have not run it"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Before submitting
+      options:
+        - label: This is not a security vulnerability report
+          required: true
+        - label: I have removed any secrets, tokens and private URLs from this report
+          required: true

@@ -9,6 +9,7 @@ endpoints, retries transient failures, and records every attempt.
 
 [![CI](https://github.com/SumitVermakgp/Hookrelay/actions/workflows/ci.yml/badge.svg)](https://github.com/SumitVermakgp/Hookrelay/actions/workflows/ci.yml)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 </div>
 
@@ -31,6 +32,7 @@ HookRelay exists as the subject of a hands-on experiment with Claude Ship; see
 - [Verifying a signature](#verifying-a-signature-receiver-side)
 - [Configuration](#configuration)
 - [Development](#development)
+- [Contributing](#contributing)
 
 ## Quick start
 
@@ -252,3 +254,14 @@ experiment-evidence/  evidence folders for the Claude Ship experiment
 
 Some tests use real sockets on `127.0.0.1` with short timeouts of a few hundred
 milliseconds. On a very slow machine they can fail for timing reasons.
+
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for the project's scope, the required
+checks, and the conventions for tests, migrations and documentation. Security problems go
+through [SECURITY.md](SECURITY.md), never a public issue.
+
+## License
+
+[MIT](LICENSE).
+

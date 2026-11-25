@@ -8,8 +8,14 @@ throwaway data only.
 
 ## Reporting a problem
 
-This is a private repository. Report security problems to the repository owner directly.
-Do not put exploit details, secrets or private URLs in public issues or pull requests.
+This is a public repository. Report security problems privately to the repository owner,
+through GitHub's **Report a vulnerability** button on the Security tab, or by a direct
+message if you already have a channel. Do not open a public issue, and do not put exploit
+details, secrets or private URLs in issues or pull requests.
+
+Because HookRelay is an experiment that is explicitly not hardened (see Status above), the
+known weaknesses listed on this page are not vulnerabilities. A report is most useful when
+it shows a control that is documented as working but does not.
 
 ## What is implemented
 
